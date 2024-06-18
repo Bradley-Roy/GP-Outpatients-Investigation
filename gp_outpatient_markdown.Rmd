@@ -1,0 +1,46 @@
+---
+title: "Border West GP Outpatient Referral Appointments"
+author: "Bradley Roy"
+date: "2024-06-14"
+output: html_document
+---
+
+
+## Background
+
+The GP Cluster Profiles are sent to Cluster Quality Leads on a quarterly basis. In the quarter 2 2023 cluster report for <B>Borders West</B> there was a large increase in the number of GP outpatient referral appointments for Trauma. From quarter 2 2022 to quarter 2023, there was an increase of <B>+95.4%</B> (+158.9% for those aged 65 and over). This is a notably larger change compared to the "All Specialties" category which showed a decrease for <B>-7.2%</B> (-7.3% for those aged 65 and over). It was agreed that the increase in Trauma referrals warranted further consideration. 
+
+This reports outlines GP Outpatient referral appointments for Borders West practices, over the period <B>1st March 2022 to 31st December 2023</B>. 
+
+
+## Outpatient Analysis
+
+
+### Borders West: Monthly GP Outpatient Referral Appointments by Age Group
+```{r, echo=FALSE}
+plotly_monthly_agegroup
+```
+Note: Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"
+
+### Borders West: Monthly GP Outpatient Referral Appointments by Speciality
+```{r, echo=FALSE}
+plotly_monthly_indicator
+```
+
+### Borders West: Monthly GP Trauma Outpatient Referral Appointments by Hospital
+```{r, echo=FALSE}
+plotly_monthly_hospital
+```
+
+### Borders West: GP Trauma Outpatient Referral Appointments for Quarter 2 by Practice
+```{r, echo=FALSE}
+plotly_total_practice
+```
+
+### Borders West: Monthly GP Trauma Outpatient Referral Appointments by Practice
+```{r, echo=FALSE}
+plotly_monthly_practice_numerator
+```
+
+
+
