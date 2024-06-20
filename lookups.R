@@ -30,7 +30,7 @@ library(glue)
 #File paths
 # setwd("/PHI_conf/PrimaryCare/PCI/Cluster Profiles")
 # setwd("~")
-Data <- paste0("./Data/")
+# Data <- paste0("./Data/")
 # Reference <- paste0("./Reference Files/")
 Reference <- "/PHI_conf/PrimaryCare/PCI/Cluster Profiles/Reference Files/"
 
@@ -50,11 +50,8 @@ practice_list <- c(' 16121', ' 16160', ' 16174', ' 16211',
 
 # Previous Financial Year
 ONE_START <- "'31 March 2022'"
-ONE_END <- "'31 December 2022'"
+ONE_END <- "'31 December 2023'"
 
-# Current Financial Year
-TWO_START <- "'31 March 2023'"
-TWO_END <- "'31 December 2023'"
 
 # Previous Financial Year
 # ONE_START <- "'31 March 2022'"
