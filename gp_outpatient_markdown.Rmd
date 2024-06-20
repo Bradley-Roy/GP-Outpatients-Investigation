@@ -1,46 +1,86 @@
 ---
 title: "Border West GP Outpatient Referral Appointments"
-author: "Bradley Roy"
-date: "2024-06-14"
+author: "LIST Contacts: Bradley Roy & Andrew Massie"
+date: "Date: 19th June 2024"
 output: html_document
 ---
 
 
 ## Background
 
-The GP Cluster Profiles are sent to Cluster Quality Leads on a quarterly basis. In the quarter 2 2023 cluster report for <B>Borders West</B> there was a large increase in the number of GP outpatient referral appointments for Trauma. From quarter 2 2022 to quarter 2023, there was an increase of <B>+95.4%</B> (+158.9% for those aged 65 and over). This is a notably larger change compared to the "All Specialties" category which showed a decrease for <B>-7.2%</B> (-7.3% for those aged 65 and over). It was agreed that the increase in Trauma referrals warranted further consideration. 
+The GP Cluster Profiles are sent to Cluster Quality Leads on a quarterly basis. In the quarter 2 2023 cluster report for <B>Borders West</B> there was a large increase in the number of GP outpatient referral appointments for Trauma. From quarter 2 2022 to quarter 2023, there was an increase of <B>+95.4%</B> (+158.9% for those aged 65 and over). This is a notably larger change compared to the "All Specialties" category which showed a decrease of <B>-7.2%</B> (-7.3% for those aged 65 and over). It was agreed that the increase in Trauma referrals warranted further consideration. 
 
-This reports outlines GP Outpatient referral appointments for Borders West practices, over the period <B>1st March 2022 to 31st December 2023</B>. 
+This reports outlines GP Outpatient referral appointments for Borders West practices over the period <B>1st March 2022 to 31st December 2023</B>. 
 
 
 ## Outpatient Analysis
 
-
-### Borders West: Monthly GP Outpatient Referral Appointments by Age Group
+### 1. Borders West: Monthly GP Outpatient Referral Appointments by Age Group
 ```{r, echo=FALSE}
 plotly_monthly_agegroup
 ```
-Note: Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"
+_Note: Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"_  
+<br>  
+The graph above shows the pattern of monthly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from February 30th 2022 to December 31st 2023. The number of appointments per month fluctuates over the period and does not show a consistent or predictable pattern. 
 
-### Borders West: Monthly GP Outpatient Referral Appointments by Speciality
+For the majority of months more appointments are attributed to the under 65 (on average: 55.9 appointments per month) age group than the 65 and over (on average: 36.2 appointments per month) age group. Across the period measured there were an average of 92.1 appointments per month. 
+
+### 2. Borders West: Monthly GP Outpatient Referral Appointments by Speciality and Age Group
 ```{r, echo=FALSE}
 plotly_monthly_indicator
 ```
 
-### Borders West: Monthly GP Trauma Outpatient Referral Appointments by Hospital
+The graph above shows the total GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group,  from February 30th 2022 to December 31st 2023. For all specialties, the number of appointments per month fluctuates over the period and does not show a consistent or predictable pattern. 
+
+For Trauma, across the period measured there were an average of 17.9 appointments. The under 65 (9.9 appointments) age group had a consistently higher number of appointments over this period when compared with the 65 and over (7.9 appointments) age group. 
+
+There is a higher number of appointments for all months in quarter 2 of 2023 than quarter 2 of 2022. Notably, the number of appointments for September 2023 (35) is the peak over the period measured and is close to double that of September 2022 (18). 
+
+### 3. Borders West: GP Trauma Outpatient Referral Appointments for Quarter 1 and 2 for 2022 and 2023 by Age Group
 ```{r, echo=FALSE}
-plotly_monthly_hospital
+plotly_total_age
 ```
 
-### Borders West: GP Trauma Outpatient Referral Appointments for Quarter 2 by Practice
+The graph above shows the total GP outpatient referral appointments (for the specialty Trauma) by age group, for quarters 1 and 2 of 2022 and 2023. 
+
+The number of appointments for quarter 1 fell between 2022 (61 appointments) and 2023 (48 appointments) but for quarter 2 the number of appointments more than doubled from 2022 (33 appointments) to 2023 (65 appointments). This pattern of decrease for quarter 1 and increase for quarter 2 is seen in both age groups included.
+
+
+### 4. Borders West: GP Trauma Outpatient Referral Appointments for Quarter 1 and 2 for 2022 and 2023 by GP Practice
 ```{r, echo=FALSE}
 plotly_total_practice
 ```
 
-### Borders West: Monthly GP Trauma Outpatient Referral Appointments by Practice
+The graph above shows the total GP outpatient referral appointments (for the specialty Trauma) by GP Practice for quarters 1 and 2 of 2022 and 2023. 
+
+For quarter 1, there is a decrease of appointments from 2022 (a total of 61 appointments) to 2023 (a total of 48 appointments) across all practices. This differs for quarter 2, in which there is an increase in appointments from 2022 (a total of 33 appointments) to 2023 (a total of 65 appointments) across all practices.
+
+In quarter 2, the number of West Linton appointments for 2022 (2 appointments) is the lowest present across all practices and quarters. This increases to 14 appointments in 2023, resulting in a percentage increase of 600%. Similarly, The Neidpath and the Tweed appointments increase from 2022 to 2023, resulting in a respective percentage increase of 79% and 113% in appointments.
+
+
+<!-- ### 5. Borders West: Monthly GP Trauma Outpatient Referral Appointments by GP Practice -->
+<!-- ```{r, echo=FALSE} -->
+<!-- plotly_monthly_practice_numerator -->
+<!-- ``` -->
+
+<!-- The graph above shows the total GP outpatient referral appointments (for the specialty Trauma) by GP Practice, from February 30th 2022 to December 31st 2023. -->
+
+
+### 5. Borders West: Monthly GP Trauma Outpatient Referral Appointments by Hospital
 ```{r, echo=FALSE}
-plotly_monthly_practice_numerator
+plotly_monthly_hospital
 ```
+
+The graph above shows the total GP outpatient referral appointments (for the specialty Trauma) by treatment location (i.e hospital),  from February 30th 2022 to December 31st 2023. For all specialties, the number of appointments per month fluctuates over the period and does not show a consistent or predictable pattern. 
+
+Borders General Hospital accounts for the majority of appointments across all months in the period. Unknown locations account for the second most common location, accounting for 9 appointments over the period. 
+
+
+
+
+
+
+
 
 
 

@@ -32,8 +32,8 @@ Outpatients_raw <- as_tibble(dbGetQuery(channel,
                                                          "POSTCODE, ETHNIC_GROUP, REFERRING_GP_GPD_GMC_NUMBER, REFERRAL_REASON_1, ",
                                                          "REFERRAL_REASON_2, REFERRAL_REASON_3, REFERRAL_REASON_4, LOCATION ",
                                                          "FROM  ANALYSIS.SMR00_PI ",  # get data from SMR0
-                                                         "WHERE (((CLINIC_DATE between ",ONE_START, " AND ", TWO_END, ")", # between these dates
-                                                         "OR (CLINIC_DATE between ", TWO_START, " AND ",TWO_END, "))", # and between these dates
+                                                         "WHERE (((CLINIC_DATE between ",ONE_START, " AND ", ONE_END, "))", # between these dates
+                                                         # "OR (CLINIC_DATE between ", TWO_START, " AND ",TWO_END, "))", # and between these dates
                                                          "AND ((REFERRAL_TYPE=1) OR (REFERRAL_TYPE=2))", # New outpatient appointments only
                                                          "AND (REFERRAL_SOURCE= '1'))"))) # GP referrals only
 

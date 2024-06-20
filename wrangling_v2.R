@@ -208,24 +208,36 @@ Outpatients_tidy_indicator <- Outpatients_tidy %>% # join selected specialties
 
 # Age Group ---------------------------------------------------------------
 
+average_monthly_total <- Outpatients_tidy_indicator |>
+  filter(AgeGroups == "All Ages") |>
+  filter(Indicator != "All Specialities") |>
+  group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator)) |>
+  ungroup()
+
+
 Outpatients_tidy_agegroup <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator != "All Specialities") |>
-  group_by(FinancialYear, month_date, month_name, AgeGroups) %>%
+  group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
-  # filter(!(is.na(Practice))) |>
-  clean_names() #|>
-  # filter(indicator != "All Specialities")
+  clean_names() |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator)) |>
+  ungroup()
 
-g_monthly <- ggplot(Outpatients_tidy_agegroup, aes(x = month_date, y = numerator, fill = age_groups, text = paste('Month: ', month_name,
-                                                                                                               '<br>Age Group: ', age_groups,
-                                                                                                               '<br>Numerator: ', numerator))) +
+
+g_monthly <- ggplot(Outpatients_tidy_agegroup, aes(x = month_date, y = numerator, fill = age_groups, text = paste('Age Group: ', age_groups,
+                                                                                                                  '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                                  '<br>Financial Quarter: ', financial_quarter,
+                                                                                                                 '<br>Numerator: ', numerator))) +
   geom_bar(stat = "identity") +
-  # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
-  # facet_wrap(~indicator) +
   labs(x = "Date",
-       y = "Numerator",
+       y = "Appointments",
        fill = "Age Group") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -238,25 +250,70 @@ plotly_monthly_agegroup <- ggplotly(g_monthly, tooltip = "text")
 
 
 
+#######total age groups
+Outpatients_total_age <- Outpatients_tidy_indicator %>%
+  filter(AgeGroups != "All Ages") |>
+  filter(Indicator == "Trauma",
+         FinancialYear %in% c(2022, 2023),
+         FinancialQuarter %in% c(1,2)) |>
+  group_by(FinancialYear, FinancialQuarter, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  mutate(financial_quarter_name = paste0("Quarter ", financial_quarter))
+
+
+g_monthly <- ggplot(Outpatients_total_age, aes(x = financial_year, y = numerator, fill = age_groups,
+                                                    text = paste('Age Groups: ', age_groups,
+                                                                 '<br>Financial Year: ', financial_year,
+                                                                 '<br>Financial Quarter: ', financial_quarter,
+                                                                 '<br>Numerator: ', numerator))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Date",
+       y = "Appointments",
+       fill = "Age Group") +
+  facet_wrap(~financial_quarter_name) +
+  # coord_flip() +
+  theme_minimal() +
+  theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+    panel.grid.major.x = element_blank(),
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 10))
+
+plotly_total_age <- ggplotly(g_monthly, tooltip = "text")
+
+
+
 # Monthly -----------------------------------------------------------------
+
+average_monthly_total_avg <- Outpatients_tidy_indicator |>
+  # filter(AgeGroups == "All Ages") |>
+  filter(Indicator == "Trauma") |>
+  group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator)) |>
+  ungroup()
+
 
 Outpatients_tidy_month <- Outpatients_tidy_indicator %>%
   filter(Indicator != "All Specialities") |>
   filter(AgeGroups != "All Ages") |>
-  group_by(FinancialYear, Indicator, month_date, month_name, AgeGroups) %>%
+  group_by(FinancialYear, FinancialQuarter, Indicator, month_date, month_name, AgeGroups) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names()
 
 
 g_monthly <- ggplot(Outpatients_tidy_month, aes(x = month_date, y = numerator, fill = age_groups, text = paste('Indicator: ', indicator,
-                                                                                                          '<br>Month: ', month_name,
-                                                                                                          '<br>Age Group: ', age_groups,
+                                                                                                               '<br>Age Group: ', age_groups,
+                                                                                                               '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                               '<br>Financial Quarter: ', financial_quarter,
                                                                                                           '<br>Numerator: ', numerator))) +
   geom_bar(stat = "identity") +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   facet_wrap(~indicator) +
   labs(x = "Date",
-       y = "Numerator",
+       y = "Appointments",
        fill = "Age Group") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -273,21 +330,22 @@ plotly_monthly_indicator <- ggplotly(g_monthly, tooltip = "text")
 Outpatients_tidy_hospital <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma") |>
-  group_by(FinancialYear, month_date, month_name, hospital_name) %>%
+  group_by(FinancialYear, FinancialQuarter, month_date, month_name, hospital_name) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names()
 
 
-g_monthly <- ggplot(Outpatients_tidy_hospital, aes(x = month_date, y = numerator, fill = hospital_name, text = paste('Month: ', month_name,
-                                                                                                                  '<br>Hospital: ', hospital_name,
+g_monthly <- ggplot(Outpatients_tidy_hospital, aes(x = month_date, y = numerator, fill = hospital_name, text = paste('Hospital: ', hospital_name,
+                                                                                                                     '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                                     '<br>Financial Quarter: ', financial_quarter,
                                                                                                                   '<br>Numerator: ', numerator))) +
   geom_bar(stat = "identity") +
   # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   # facet_wrap(~indicator) +
   labs(x = "Date",
-       y = "Numerator",
-       fill = "Age Group") +
+       y = "Appointments",
+       fill = "Hospital") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.grid.major.x = element_blank(),
@@ -305,20 +363,43 @@ plotly_monthly_hospital <- ggplotly(g_monthly, tooltip = "text")
 Outpatients_total_practice <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma",
-         FinancialQuarter == 2) |>
-  group_by(FinancialYear, Practice_title) %>%
+         FinancialYear %in% c(2022, 2023),
+         FinancialQuarter %in% c(1,2)) |>
+  group_by(FinancialYear, FinancialQuarter, Practice_title) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
-  clean_names()
+  clean_names() |>
+  mutate(financial_quarter_name = paste0("Quarter ", financial_quarter))
 
 
-g_monthly <- ggplot(Outpatients_total_practice, aes(x = financial_year, y = numerator, fill = practice_title,
+# g_monthly <- ggplot(Outpatients_total_practice, aes(x = financial_year, y = numerator, fill = practice_title,
+#                                                     text = paste('Practice: ', practice_title,
+#                                                                  '<br>Financial Year: ', financial_year,
+#                                                                  '<br>Financial Quarter: ', financial_quarter,
+#                                                                  '<br>Numerator: ', numerator))) +
+#   geom_bar(stat = "identity") +
+#   facet_wrap(~financial_quarter_name) +
+#   labs(x = "Date",
+#        y = "Appointments",
+#        fill = "Practice") +
+#   # coord_flip() +
+#   theme_minimal() +
+#   theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+#     panel.grid.major.x = element_blank(),
+#     legend.text = element_text(size = 10),
+#     legend.title = element_text(size = 10))
+
+
+g_monthly <- ggplot(Outpatients_total_practice, aes(x = financial_quarter_name, y = numerator, fill = financial_year,
                                                     text = paste('Practice: ', practice_title,
                                                                  '<br>Financial Year: ', financial_year,
+                                                                 '<br>Financial Quarter: ', financial_quarter,
                                                                  '<br>Numerator: ', numerator))) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~practice_title, scales = "free") +
+  # coord_flip() +
   labs(x = "Date",
-       y = "Numerator",
-       fill = "Practice") +
+       y = "Appointments",
+       fill = "Year") +
   # coord_flip() +
   theme_minimal() +
   theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -333,7 +414,7 @@ plotly_total_practice <- ggplotly(g_monthly, tooltip = "text")
 Outpatients_tidy_practice <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma") |>
-  group_by(FinancialYear, month_date, month_name, Practice_title) %>%
+  group_by(FinancialYear, FinancialQuarter, month_date, month_name, Practice_title) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names() |>
   group_by(month_date) |>
@@ -342,8 +423,9 @@ Outpatients_tidy_practice <- Outpatients_tidy_indicator %>%
   mutate(percentage = percent(round_half_up(numerator / total, 2)))
 
 
-g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator, fill = practice_title, text = paste('Month: ', month_name,
-                                                                                                                     '<br>Practice: ', practice_title,
+g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator, fill = practice_title, text = paste('Practice: ', practice_title,
+                                                                                                                      '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                                     '<br>Financial Quarter: ', financial_quarter,
                                                                                                                      '<br>Numerator: ', numerator,
                                                                                                                      '<br>Percent: ', percentage))) +
   geom_bar(stat = "identity", position = "fill") +
@@ -363,16 +445,17 @@ g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator
 plotly_monthly_practice_per <- ggplotly(g_monthly, tooltip = "text")
 
 
-g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator, fill = practice_title, text = paste('Month: ', month_name,
-                                                                                                                      '<br>Practice: ', practice_title,
+g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator, fill = practice_title, text = paste('Practice: ', practice_title,
+                                                                                                                      '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                                      '<br>Financial Quarter: ', financial_quarter,
                                                                                                                       '<br>Numerator: ', numerator,
                                                                                                                       '<br>Percent: ', percentage))) +
   geom_bar(stat = "identity") +
   # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
-  # facet_wrap(~indicator) +
+  # facet_wrap(~financial_quarter) +
   labs(x = "Date",
-       y = "Precent",
+       y = "Appointments",
        fill = "Practice") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -383,85 +466,4 @@ g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator
 plotly_monthly_practice_numerator <- ggplotly(g_monthly, tooltip = "text")
 
 
-
-
-
-# Normal output -----------------------------------------------------------
-
-Outpatients_tidy_summary <- Outpatients_tidy_indicator %>%
-  group_by(Indicator, Practice, FinancialYear, FinancialQuarter, AgeGroups) %>%
-  summarise(Numerator = n()) %>%  ungroup() %>%
-  filter(!(is.na(Practice)))
-# mutate(Indicator = ifelse(Indicator == "Dermatology", "New OP Rate per 1,000 Dermatology",
-#                           ifelse(Indicator == "ENT", "New OP Rate per 1,000 ENT",
-#                                  ifelse(Indicator == "Trauma", "New OP Rate per 1,000 Trauma",
-#                                         ifelse(Indicator == "General Surgery","New OP Rate per 1,000 GenSurg" ,
-#                                                "New OP Rate per 1,000 AllSpec")))))
-
-Outpatients_tidy_summary2 <- Outpatients_tidy_summary |>
-  select(FinancialYear, FinancialQuarter, AgeGroups, Indicator, Numerator)
-# Use Lookup so a Practice will still have a case if the numerator is 0 or missing
-# Then we match it up with the data
-
-
-Outpatients_tidy <- LookupCluster %>%
-  # full_join(Outpatients_tidy_summary %>%
-  #             select(FinancialYear, FinancialQuarter, AgeGroups, Indicator) %>%
-  #             distinct) %>%
-  full_join(Outpatients_tidy_summary2) %>%
-  left_join(Outpatients_tidy) %>%
-  mutate(Numerator = ifelse(is.na(Numerator), 0, Numerator)) %>%
-  mutate(Domain = "Outpatients",
-         Term = "Financial Quarter")|>
-  filter(Practice %in% practice_list)
-
-# saveRDS(Outpatients_tidy, file=  paste0(Data,"Outpatients_tidy ", FinancialYear2, " Q", FinancialQ, ".rds"))
-
-# rm("Outpatients_raw", "OutpatientsAllAges", "OutpatientsAllSpecialties")
-
-# Outpatients_tidy <- read_rds(paste0(Data,"Outpatients_tidy ",FinancialYear2, " Q", FinancialQ ,".rds"))
-# LookupDemographics <- readRDS(paste0(Data, "LookupDemographics ", FinancialYear2, " Q", FinancialQ, ".rds"))
-
-Outpatients <- Outpatients_tidy %>%
-  anti_join(Exclude, by = c("Practice" = "Code")) %>%
-  semi_join(LookupCluster) %>%
-  left_join(LookupCluster) %>%
-  arrange(Practice) %>%
-  group_by(Practice)  %>%
-  fill(Cluster, .direction = "up") %>%
-  # fill(PracticeName, .direction = "up") %>%
-  fill(Practice_title, .direction = "up") %>%
-  ungroup()
-
-Outpatients <- Outpatients %>%
-  mutate(Practice=paste0(Practice, " - ", Practice_title), # rewrite Practice variable to have Code and Name
-         Scotland = "Scotland") %>%
-  # select(-Practice_title, -NHSBoard, -HSCP, -ListSize) %>%
-  select(-Practice_title, -NHSBoard, -HSCP) %>%
-  gather(Practice, Cluster, #PeerGroup,
-         Scotland, # collect these columns
-         key = Geography, value = GeographyName)  # and place them into one column named "GeographyName"
-
-
-OutpatientsGeographies <- Outpatients %>%
-  filter(Geography == "Practice") %>%
-  left_join(PracticeGeography %>% # To add on HSCP and NHS Board
-              rename(GeographyName = Practice)) %>%
-  select(-Geography, -GeographyName, -ListSize) %>%
-  gather(HSCP, NHSBoard,   # collect these columns
-         key = Geography, value = GeographyName)
-
-Outpatients  <- Outpatients %>%
-  rbind(OutpatientsGeographies) %>%
-  group_by(FinancialYear, FinancialQuarter, AgeGroups,  Geography, GeographyName, Indicator, Term) %>%
-  summarise(Numerator = sum(Numerator)) %>% ungroup() %>%
-  left_join(LookupDemographics) %>% # to add on populations
-  rename(Denominator = Population) %>%
-  mutate(Rate =(1000*(Numerator/Denominator)),
-         Domain = "Outpatients")
-
-# rm("Outpatients_tidy", "OutpatientsGeographies")
-
-
-rm(Outpatients_raw)
 
