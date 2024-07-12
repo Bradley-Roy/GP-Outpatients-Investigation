@@ -158,9 +158,11 @@ Outpatients_tidy <- Outpatients_raw %>%
          FinancialQuarter = as.character(ifelse(CalendarQuarter-1 == 0, 4, CalendarQuarter-1)),
          month_date = ymd(floor_date(ClinicDate, "month")),
          month_name = month(month_date, abbr = FALSE, label = TRUE)) %>%
-  left_join(hospital_codes)
-  # filter(FinancialQuarter == FinancialQ) %>%  # filter to Financial quarter that we want
-  # select(-CalendarQuarter, -CalendarYear)
+  left_join(hospital_codes) |>
+  # mutate(fin_year_cd = extract_fin_year(ClinicDate)) |>
+  # mutate(financial_year_q = paste0(fin_year_cd, " - ", FinancialQuarter)) |>
+  filter(ClinicDate >= "2021-04-01")
+
 
 # Create aggregate data for All Ages
 OutpatientsAllAges <- Outpatients_tidy %>%
@@ -180,16 +182,9 @@ Outpatients_tidy <- Outpatients_tidy %>%
 OutpatientsAllSpecialties <- Outpatients_tidy %>%
   mutate(Indicator = "All Specialities")
 
-# Outpatients_tidy2 <- Outpatients_tidy |>
-#   anti_join(Exclude, by = c("Practice" = "Code")) #%>%
-# semi_join(LookupCluster) %>%
-# left_join(LookupCluster)
-
 
 Outpatients_tidy_indicator <- Outpatients_tidy %>% # join selected specialties
   bind_rows(OutpatientsAllSpecialties) |>
-  # rbind(OutpatientsAllSpecialties) %>% # to all specialties
-  # filter(Indicator %in% c("All Specialities", "Dermatology", "General Surgery", "Trauma", "ENT")) %>% # filter for ones we want
   filter(Indicator %in% c("Trauma"))
 
 
@@ -208,21 +203,55 @@ Outpatients_tidy_indicator <- Outpatients_tidy %>% # join selected specialties
 
 # Age Group ---------------------------------------------------------------
 
-average_monthly_total <- Outpatients_tidy_indicator |>
-  filter(AgeGroups == "All Ages") |>
-  filter(Indicator != "All Specialities") |>
-  group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
-  summarise(Numerator = n()) %>%  ungroup() %>%
-  clean_names() |>
-  group_by(age_groups) |>
-  mutate(average = mean(numerator)) |>
-  ungroup()
+# average_monthly_total <- Outpatients_tidy_indicator |>
+#   filter(AgeGroups == "All Ages") |>
+#   filter(Indicator != "All Specialities") |>
+#   group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
+#   summarise(Numerator = n()) %>%  ungroup() %>%
+#   clean_names() |>
+#   group_by(age_groups) |>
+#   mutate(average = mean(numerator)) |>
+#   ungroup()
+#
+#
+# Outpatients_tidy_agegroup <- Outpatients_tidy_indicator %>%
+#   filter(AgeGroups != "All Ages") |>
+#   filter(Indicator != "All Specialities") |>
+#   group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
+#   summarise(Numerator = n()) %>%  ungroup() %>%
+#   clean_names() |>
+#   group_by(age_groups) |>
+#   mutate(average = mean(numerator)) |>
+#   ungroup()
+#
+#
+# g_monthly <- ggplot(Outpatients_tidy_agegroup, aes(x = month_date, y = numerator, fill = age_groups,
+#                                                    text = paste('Age Group: ', age_groups,
+#                                                                 '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+#                                                                 '<br>Financial Quarter: ', financial_quarter,
+#                                                                 '<br>Numerator: ', numerator))) +
+#   geom_bar(stat = "identity", position = "dodge") +
+#   paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
+#   labs(x = "Date",
+#        y = "Appointments",
+#        fill = "Age Group") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+#         panel.grid.major.x = element_blank(),
+#         legend.text = element_text(size = 10),
+#         legend.title = element_text(size = 10))
+#
+# plotly_monthly_agegroup <- ggplotly(g_monthly, tooltip = "text")
 
+
+
+# quarterly  --------------------------------------------------------------
 
 Outpatients_tidy_agegroup <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator != "All Specialities") |>
-  group_by(FinancialYear, FinancialQuarter, month_date, month_name, AgeGroups) %>%
+  group_by(financial_year_q, fin_year_cd, FinancialQuarter, AgeGroups) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names() |>
   group_by(age_groups) |>
@@ -230,12 +259,14 @@ Outpatients_tidy_agegroup <- Outpatients_tidy_indicator %>%
   ungroup()
 
 
-g_monthly <- ggplot(Outpatients_tidy_agegroup, aes(x = month_date, y = numerator, fill = age_groups, text = paste('Age Group: ', age_groups,
-                                                                                                                  '<br>Date: ', format.Date(month_date, format = "%B %Y"),
-                                                                                                                  '<br>Financial Quarter: ', financial_quarter,
-                                                                                                                 '<br>Numerator: ', numerator))) +
-  geom_bar(stat = "identity") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
+g_q_agegroups <- ggplot(Outpatients_tidy_agegroup, aes(x = financial_year_q, y = numerator, fill = age_groups,
+                                                   text = paste('Age Group: ', age_groups,
+                                                                '<br>Financial Year: ', fin_year_cd,
+                                                                '<br>Financial Quarter: ', financial_quarter,
+                                                                '<br>Numerator: ', numerator))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
+  # scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   labs(x = "Date",
        y = "Appointments",
        fill = "Age Group") +
@@ -245,17 +276,15 @@ g_monthly <- ggplot(Outpatients_tidy_agegroup, aes(x = month_date, y = numerator
         legend.text = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-plotly_monthly_agegroup <- ggplotly(g_monthly, tooltip = "text")
-
-
+plotly_q_agegroup <- ggplotly(g_q_agegroups, tooltip = "text")
 
 
 #######total age groups
 Outpatients_total_age <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma",
-         FinancialYear %in% c(2022, 2023),
-         FinancialQuarter %in% c(1,2)) |>
+         FinancialYear %in% c(2021, 2022, 2023),
+         FinancialQuarter %in% c(1,2,3)) |>
   group_by(FinancialYear, FinancialQuarter, AgeGroups) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names() |>
@@ -267,23 +296,24 @@ g_monthly <- ggplot(Outpatients_total_age, aes(x = financial_year, y = numerator
                                                                  '<br>Financial Year: ', financial_year,
                                                                  '<br>Financial Quarter: ', financial_quarter,
                                                                  '<br>Numerator: ', numerator))) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", position = "dodge") +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
   labs(x = "Date",
        y = "Appointments",
        fill = "Age Group") +
   facet_wrap(~financial_quarter_name) +
-  # coord_flip() +
   theme_minimal() +
   theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
     panel.grid.major.x = element_blank(),
     legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10))
+    legend.title = element_text(size = 10),
+    panel.spacing = unit(2, "lines"))
 
 plotly_total_age <- ggplotly(g_monthly, tooltip = "text")
 
 
 
-# Monthly -----------------------------------------------------------------
+# Monthly Indicator -----------------------------------------------------------------
 
 average_monthly_total_avg <- Outpatients_tidy_indicator |>
   # filter(AgeGroups == "All Ages") |>
@@ -309,8 +339,9 @@ g_monthly <- ggplot(Outpatients_tidy_month, aes(x = month_date, y = numerator, f
                                                                                                                '<br>Date: ', format.Date(month_date, format = "%B %Y"),
                                                                                                                '<br>Financial Quarter: ', financial_quarter,
                                                                                                           '<br>Numerator: ', numerator))) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", position = "dodge") +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
   facet_wrap(~indicator) +
   labs(x = "Date",
        y = "Appointments",
@@ -319,20 +350,68 @@ g_monthly <- ggplot(Outpatients_tidy_month, aes(x = month_date, y = numerator, f
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.grid.major.x = element_blank(),
         legend.text = element_text(size = 10),
-        legend.title = element_text(size = 10))
+        legend.title = element_text(size = 10),
+        panel.spacing = unit(2, "lines"))
 
 plotly_monthly_indicator <- ggplotly(g_monthly, tooltip = "text")
 
 
 
-# Hospital ----------------------------------------------------------------
+
+# Quarterly Indicator -----------------------------------------------------------------
+
+average_q_total_avg <- Outpatients_tidy_indicator |>
+  # filter(AgeGroups == "All Ages") |>
+  filter(Indicator == "Trauma") |>
+  group_by(FinancialYear, FinancialQuarter, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator)) |>
+  ungroup()
+
+
+Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
+  filter(Indicator != "All Specialities") |>
+  filter(AgeGroups != "All Ages") |>
+  mutate(fin_year_cd = extract_fin_year(ClinicDate)) |>
+  group_by(fin_year_cd, FinancialQuarter, Indicator, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  mutate(financial_year_q = paste0(fin_year_cd, " - ", FinancialQuarter)) |>
+  clean_names()
+
+
+g_indicator_quart <- ggplot(Outpatients_tidy_q, aes(x = financial_year_q, y = numerator, fill = age_groups, text = paste('Indicator: ', indicator,
+                                                                                                               '<br>Age Group: ', age_groups,
+                                                                                                               '<br>Financial Quarter: ', financial_quarter,
+                                                                                                               '<br>Numerator: ', numerator))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  # scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
+  facet_wrap(~indicator, scales = "free") +
+  labs(x = "Date",
+       y = "Appointments",
+       fill = "Age Group") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major.x = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        panel.spacing = unit(2, "lines"))
+
+plotly_q_indicator <- ggplotly(g_indicator_quart, tooltip = "text")
+
+
+
+# Hospital Monthly ----------------------------------------------------------------
 
 Outpatients_tidy_hospital <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma") |>
   group_by(FinancialYear, FinancialQuarter, month_date, month_name, hospital_name) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
-  clean_names()
+  clean_names() |>
+  mutate(hospital_name = replace_na(hospital_name, "Unknown"))
 
 
 g_monthly <- ggplot(Outpatients_tidy_hospital, aes(x = month_date, y = numerator, fill = hospital_name, text = paste('Hospital: ', hospital_name,
@@ -343,6 +422,8 @@ g_monthly <- ggplot(Outpatients_tidy_hospital, aes(x = month_date, y = numerator
   # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   # facet_wrap(~indicator) +
+  # paletteer::scale_fill_paletteer_d("khroma::sunset") +
+  paletteer::scale_fill_paletteer_d("MetBrewer::Monet") +
   labs(x = "Date",
        y = "Appointments",
        fill = "Hospital") +
@@ -356,6 +437,43 @@ plotly_monthly_hospital <- ggplotly(g_monthly, tooltip = "text")
 
 
 
+
+# Hospital Quarterly ----------------------------------------------------------------
+
+Outpatients_tidy_hospital <- Outpatients_tidy_indicator %>%
+  mutate(fin_year_cd = extract_fin_year(ClinicDate)) |>
+  mutate(financial_year_q = paste0(fin_year_cd, " - ", FinancialQuarter)) |>
+  filter(AgeGroups != "All Ages") |>
+  filter(Indicator == "Trauma") |>
+  mutate(hospital_name = case_when(hospital_name == "Borders General Hospital" ~ "Borders General Hospital",
+                                   TRUE ~ "Other")) |>
+  group_by(financial_year_q, FinancialQuarter, hospital_name) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  mutate(hospital_name = replace_na(hospital_name, "Unknown"))
+
+
+g_monthly <- ggplot(Outpatients_tidy_hospital, aes(x = financial_year_q, y = numerator, fill = hospital_name, text = paste('Hospital: ', hospital_name,
+                                                                                                                     # '<br>Date: ', format.Date(month_date, format = "%B %Y"),
+                                                                                                                     '<br>Financial Quarter: ', financial_quarter,
+                                                                                                                     '<br>Numerator: ', numerator))) +
+  geom_bar(stat = "identity") +
+  # geom_line() +
+  # scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
+  # facet_wrap(~indicator) +
+  paletteer::scale_fill_paletteer_d("PNWColors::Shuksan2") +
+  labs(x = "Date",
+       y = "Appointments",
+       fill = "Hospital") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major.x = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10))
+
+plotly_monthly_hospital <- ggplotly(g_monthly, tooltip = "text")
+
+
 # Practice ----------------------------------------------------------------
 
 ############ Practice totals
@@ -364,7 +482,7 @@ Outpatients_total_practice <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma",
          FinancialYear %in% c(2022, 2023),
-         FinancialQuarter %in% c(1,2)) |>
+         FinancialQuarter %in% c(1,2,3)) |>
   group_by(FinancialYear, FinancialQuarter, Practice_title) %>%
   summarise(Numerator = n()) %>%  ungroup() %>%
   clean_names() |>
@@ -397,6 +515,7 @@ g_monthly <- ggplot(Outpatients_total_practice, aes(x = financial_quarter_name, 
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~practice_title, scales = "free") +
   # coord_flip() +
+  paletteer::scale_fill_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
   labs(x = "Date",
        y = "Appointments",
        fill = "Year") +
@@ -405,7 +524,8 @@ g_monthly <- ggplot(Outpatients_total_practice, aes(x = financial_quarter_name, 
   theme(#axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
     panel.grid.major.x = element_blank(),
     legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10))
+    legend.title = element_text(size = 10),
+    panel.spacing = unit(2, "lines"))
 
 plotly_total_practice <- ggplotly(g_monthly, tooltip = "text")
 
@@ -432,6 +552,7 @@ g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator
   # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   scale_y_continuous(labels = percent) +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
   # facet_wrap(~indicator) +
   labs(x = "Date",
        y = "Precent",
@@ -454,6 +575,7 @@ g_monthly <- ggplot(Outpatients_tidy_practice, aes(x = month_date, y = numerator
   # geom_line() +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y %b") +
   # facet_wrap(~financial_quarter) +
+  paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
   labs(x = "Date",
        y = "Appointments",
        fill = "Practice") +
