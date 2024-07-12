@@ -11,12 +11,9 @@
 rm(list = ls())
 gc()
 
-######################################## Set up ########################################
-library("tidyverse")
-library("stringr")
-
 ############################################## Set up ##############################################
 library("tidyverse")
+library("stringr")
 library("DBI") # need this for connecting to SMR data
 library("odbc") # need this for connecting to SMR data
 library("zoo")
@@ -25,6 +22,12 @@ library(janitor)
 library(plotly)
 library(scales)
 library(glue)
+library(paletteer)
+library(phsmethods)
+library("haven") # read spss files
+library("openxlsx") # read excel workbooks
+library("readxl")
+
 
 
 #File paths
@@ -47,29 +50,6 @@ practice_list <- c(' 16121', ' 16160', ' 16174', ' 16211',
 # NOTE - THESE MUST BE IN THE FORMAT "'31 December 2019'" or it will not work
 
 
-
-# Previous Financial Year
-ONE_START <- "'31 March 2022'"
-ONE_END <- "'31 December 2023'"
-
-
-# Previous Financial Year
-# ONE_START <- "'31 March 2022'"
-# ONE_END <- "'31 December 2022'"
-#
-# # Current Financial Year
-# TWO_START <- "'31 March 2023'"
-# TWO_END <- "'31 December 2023'"
-
-#Set specific financial years of interest (eg for 2018/19 - "2018")
-FinancialYear1 <- "2022"
-FinancialYear2 <- "2023"
-# FinancialQ <- "3"
-FinancialQ <- "2"
-
-Year1 <-"2022"
-Year2 <-"2023"
-FinancialQ <- "2"
 
 ######################################## Lookup - Practice Files ########################################
 # This gets the latest list size and cluster lookup from open data website. I've kept the dates in so it's obvious which month and year we are using.
