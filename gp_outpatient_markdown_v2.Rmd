@@ -1,7 +1,7 @@
 ---
 title: "Border West GP Outpatient Referral Appointments"
 author: "LIST Contacts: Bradley Roy & Andrew Massie"
-date: "Date: 12th July 2024"
+date: "Date Extracted: 15th July 2024"
 output: html_document
 ---
 
@@ -23,34 +23,31 @@ Scotland (SMR00).
 
 ## Outpatient Analysis
 
-### 1. Borders West: Quarterly GP Outpatient Referral Appointments (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT") by Age Group, from Quarter 1 2021/22 to Quarter 3 2023/24 
+### 1. Borders West: Quarterly GP Outpatient Referral Appointments (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT") by Age Group, Quarter 1 2021/22 to Quarter 3 2023/24 
 ```{r, echo=FALSE}
 plotly_q_agegroup
 ```
-<!-- _Note: Specialties include _   -->
-<br>  
-The graph above shows the pattern of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
 
-For those aged under 65, there is an increase in the number of appointments, reaching a peak of 254 appointments in 2021/22 Q3. This is followed by followed by a decline in appointments. 
+Figure 1 shows the pattern of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
 
-For those aged 65 and over, the number of appointments per quarter fluctuates over the period and does not show a consistent or predictable pattern. 
+For those aged under 65, there is an increase in the number of appointments from quarter 1 2021/22 to quarter 4 201/22, reaching a peak of 254 appointments in 2021/22 Q3. There is an overall decline in appointments from quarter 4 to quarter 3 2023/24. For those aged 65 and over, the number of quarterly appointments fluctuates over the period and does not show a consistent or predictable pattern. 
 
 For the majority of quarters shown in figure 1, more appointments are attributed to the under 65 (on average: 187 appointments per quarter) age group than the 65 and over (on average: 117 appointments per quarter) age group. Across the period measured there were an average of 152 appointments per quarter. 
 
-### 2. Borders West: Quarterly GP Outpatient Referral Appointments by Speciality and Age Group (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"), from Quarter 1 2021/22 to Quarter 3 2023/24 
+### 2. Borders West: Quarterly GP Outpatient Referral Appointments by Speciality and Age Group (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"), Quarter 1 2021/22 to Quarter 3 2023/24 
 ```{r, echo=FALSE}
 plotly_q_indicator
 ```
 
-The graph above shows the number of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
+Figure 2 shows the number of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
 
-Over the period of 9 quarters measured General Surgery referrals account for the majority of appointments (1,132, 33.9% of appointments included in Fig. 1), followed by Dermatology (902, 27.0% of appointments included in Fig. 1), Trauma (689, 20.6% of appointments included in Fig. 1), and ENT (621, 18.6% of appointments included in Fig. 1). On average, there were 77 GP referrals to Trauma per quarter. 
+Over the period measured in figure 2, General Surgery referrals account for the majority of appointments (1,132, 33.9% of appointments included in figure 1), followed by Dermatology (902, 27.0% of appointments included in figure 1), Trauma (689, 20.6% of appointments included in figure 1), and ENT (621, 18.6% of appointments included in figure 1). 
 
-For General Surgery and ENT there is a visible distinction between the number of appointments for each age group, with those aged under 65 having a consistently higher number of appointments than people aged 65 and over across all quarters measured in figure 2. For Dermatology and Trauma, there is a less consistent difference in the number of appointments for each age group. 
+For General Surgery and ENT there is a visible distinction between the quarterly number of appointments for each age group, with those aged under 65 having a consistently higher number of appointments than people aged 65 and over across all quarters measured in figure 2. For Dermatology and Trauma, neither age group is consistently higher in the number of quarterly appointments for the period measured in figure 2. 
 
-For Trauma, across the period measured there were an average of 63 appointments per quarter. Those aged under 65 had a higher number of appointments over this period (2,059, an average of 47 appointments per quarter) when compared with the 65 and over age group (1,285, and average of 29 appointments per quarter). The highest number of appointments for both age groups occured in quarter 4 of 2021/22, with a total of 122 appointments (67 for people aged under 65s and 55 for people aged 65 and over).
+For Trauma, those aged under 65 had a higher number of appointments over this period (2,059, an average of 47 appointments per quarter) when compared with the 65 and over age group (1,285, and average of 29 appointments per quarter). The highest number of appointments for both age groups occurred in quarter 4 of 2021/22, with a total of 122 appointments (67 appointments for people aged under 65s and 55 appointments for people aged 65 and over).
 
-The quarter of interest, quarter 2, 2023/24, is below the quarterly average (from March 1st 2021 to December 31st 2023), and does not differ from the quarterly pattern. Notably, quarter 2 of 2022/23 recorded the second lowest quarterly number of appointments across the period (33 appointments). This low number of appointments is part of why the increase between quarter 2 of 2022/23 and 2023/24 is so large. Quarter 2 of 2021/22 has a number of appointments more consistent with quarter 2 of 2023/24.
+During quarter 2 of 2023/24, the number of Trauma appointments was above the quarterly average (65 Trauma appointments, on average 63 Trauma appointments per quarter). Notably, quarter 2 of 2022/23 recorded the second lowest quarterly number of appointments across the period (33 appointments). This low number of appointments is partly why the increase between quarter 2 of 2022/23 and quarter 2 of 2023/24 is so pronounced. Quarter 2 of 2021/22 has a number of appointments more consistent with those seen in quarter 2 of 2023/24.
 
 
 <!-- There is a higher number of appointments for all quarters in quarter 2 of 2023 than quarter 2 of 2022. Notably, the number of appointments for September 2023 (35 appointments) is the peak over the period measured and is close to double that of September 2022 (18 appointments).  -->
@@ -73,29 +70,29 @@ The quarter of interest, quarter 2, 2023/24, is below the quarterly average (fro
 <!-- For quarter 3, the number of appointments decreases by over half between 2022 (81) and 2023 (31). This decrease is present for both age groups, showing a decrease of 23 appointments for those aged over 65 and and 27 appointments for those aged under 65. -->
 
 
-### 4. Borders West: GP Trauma Outpatient Referral Appointments by GP Practice, from Quarter 1 2021/22 to Quarter 3 2023/24 
+### 3. Borders West: GP Trauma Outpatient Referral Appointments by GP Practice, Quarter 1 2021/22 to Quarter 3 2023/24 
 ```{r, echo=FALSE}
 plotly_q_practice
 ```
 
-The graph above shows the total GP outpatient referral appointments (for the specialty Trauma) by GP Practice from March 1st 2021 to December 31st 2023. 
+Figure 3 the total GP outpatient referral appointments (for the specialty Trauma) by GP Practice from March 1st 2021 to December 31st 2023. 
 
-Across all practices shown in figure 4, the highest number of appointments occurred in quarter 4 of 2021/22. 
+Across all practices shown in figure 3, the highest number of appointments occurred in quarter 3 of 2021/22. Over the period measured, all practices in figure 3 other than The Tweed have a higher number of appointments for those aged under 65 than those aged 65 and over. 
 
-Over the period measured, all practices in figure 4 other than The Tweed have a higher number of appointments for those aged under 65 than those aged 65 and over. 
+For quarter 2 of 2022/23, the number of appointments is notably lower for the 65 and over age group in St. Ronan's, and The Neidpath. West Linton has a lower or equal number of appointments compared to all other quarters for both age groups shown shown in figure 3. The Tweed has a lower number of appointments for people aged under 65, but this does not differ greatly from the pattern seen across the period measured. 
 
-The quarter of interest, quarter 2, 2023/24, the number of appointments is notably lower for the 65 and over age group in St. Ronan's, and The Neidpath. West Linton has a lower number of appointments for the expected trend for both age groups shown in figure 4. The Tweed has a low number of appointments for people aged under 65, but this is consistent with the pattern across the period measured. 
+In figure 3, for quarter 2 of 2023/24, St. Ronan's and The Tweed have a lower number of appointments for both age groups shown than the quarterly average number of appointments. Whereas, The Neidpath and West Linton have a higher number of appointments for both age groups shown than their respective quarterly average number of appointments.  
 
-### 5. Borders West: Quarterly GP Trauma Outpatient Referral Appointments by Hospital, from Quarter 1 2021/22 to Quarter 3 2023/24 
+### 4. Borders West: Quarterly GP Trauma Outpatient Referral Appointments by Hospital, Quarter 1 2021/22 to Quarter 3 2023/24 
 ```{r, echo=FALSE}
 plotly_q_hospital
 ```
 
-The graph above shows the number of quarterly GP outpatient referral appointments (for the specialty Trauma) by treatment location (i.e hospital), from March 1st 2022 to December 31st 2023. The "Other" category includes all other locations which patients were referred to over this period measured, they have been aggregated into the "Other" group for clarity. The number of appointments per quarter fluctuates over the period and does not show a consistent or predictable pattern. 
+Figure 4 shows the number of quarterly GP outpatient referral appointments (for the specialty Trauma) by treatment location (i.e hospital), from March 1st 2022 to December 31st 2023. The "Other" category includes all locations other than Borders General Hospital for which outpatient referral appointments occurred over this period measured, they have been aggregated into the "Other" group for clarity. The number of appointments per quarter fluctuates over the period and does not show a consistent or predictable pattern. 
 
-Borders General Hospital accounts for the majority of appointments across all quarters in the period, 643 appointments (92.9% of appointments). "Other" locations account for the second most common location, accounting for 46 appointments over the period. 
+Borders General Hospital accounts for the majority of appointments across all quarters in the period, 643 appointments (92.9% of appointments). "Other" locations account for 46 appointments over the period, an average of 4 appointments per quarter. 
 
-Interestingly, there appears to be a steady decline in the number of "Other" category appointments from quarter 1 of 2021/22 to quarter 3 of 2023/24. In the most recent financial year (2023/24), there has been only one appointment to a treatment location within the "Other" category. 
+Notably, there appears to be a steady decline in the number of "Other" category appointments from quarter 1 of 2021/22 to quarter 3 of 2023/24. In the most recent financial year (2023/24), there has been only one appointment to a treatment location within the "Other" category. 
 
 
 

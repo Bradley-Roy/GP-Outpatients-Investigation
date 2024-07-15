@@ -38,53 +38,6 @@ LookupClusterLS <- readRDS(paste0(Reference,"LookupCluster ", FinancialYear2, " 
   select(Practice, FinancialQuarter, FinancialYear, ListSize, Cluster, HSCP, NHSBoard)
 
 
-##############################################  Demographics - Sex ##############################################
-
-SexDemographics <- ListYear1 %>% # from open data read in at start of syntax 2.
-  full_join(ListYear2) %>%
-  select(-SexQF, -Ages0To4QF, -Ages5To14QF, -Ages25To44QF, -Ages15To24QF, -Ages45To64QF,
-         -Ages65To74QF,-Ages75To84QF, -Ages85PlusQF, -HB, -HSCP) %>% # remove columns we don't want
-  rename('All Ages' = AllAges,
-         '0_4' = Ages0to4,
-         '05_14' = Ages5to14,
-         '15_24' = Ages15to24,
-         '25_44' = Ages25to44,
-         '45_64' = Ages45to64,
-         '65_74' = Ages65to74,
-         '75_84' = Ages75to84,
-         '85plus' = Ages85plus) %>%
-  gather(key=AgeGroups, value = Age_populations,'All Ages', '0_4':'85plus') %>% # flip data round so we have Age Group column and Population column
-  mutate(Practice = as.character(PracticeCode),#Date = as.character(Date),
-         CalendarYear = as.numeric(substr(as.character(Date),1,4)), # calendar year is the first 4 digits
-         CalendarMonth = as.numeric(substr(as.character(Date), 5,6)),  # calendar month is the next 2 digits
-         FinancialQuarter = as.character(ifelse(CalendarMonth %in% c(1, 2, 3), 4,
-                                                ifelse(CalendarMonth %in% c(4, 5, 6), 1,
-                                                       ifelse(CalendarMonth %in% c(7, 8, 9), 2, 3)))),
-         FinancialYear = as.character(ifelse(FinancialQuarter %in% c("4"), CalendarYear-1, CalendarYear)),
-         Indicator = Sex) %>%
-
-  left_join(mergers, by = c("Practice" = "Code")) %>%  # join to mergers lookup
-  mutate(Practice = ifelse(is.na(`New Code`), Practice, `New Code`)) %>% # Update Practice Codes
-  group_by(FinancialYear, FinancialQuarter, Practice, AgeGroups, Indicator, Sex) %>%
-  summarise(Age_populations = sum(Age_populations)) %>%  ungroup() %>% # aggregate List Size - this fixes populations for merged practices.
-
-  anti_join(Exclude, by = c("Practice" = "Code")) # remove practices to be excluded
-
-
-# Here we are first creating a masterlist of all Practices and indicators
-# this is so a Practice will still have a case if the patient numbers are missing
-# Then we match it up with the data
-AgeSexDemographics <- SexDemographics %>%
-  select(FinancialYear, FinancialQuarter, AgeGroups, Sex, Indicator) %>% distinct %>% # creates a dataframe of time period, Age, Sex. So we can create masterlist of all practices and add data back on
-  full_join(LookupCluster) %>% # from lookups. Gives us all combinations of Practice, Time period, Age, Sex to add data back onto
-  left_join(SexDemographics) %>% # add populations back on
-  mutate(Age_populations = ifelse(is.na(Age_populations), 0, Age_populations)) # if practice is missing population but should have one... set to zero.
-
-# saveRDS(AgeSexDemographics, file = paste0(Data,"SexDemographics ", FinancialYear2, " Q", FinancialQ, ".rds"))
-
-#tidy up files
-rm("ListYear1", "ListYear2", "SexDemographics")
-
 ##############################################  Demographics - SIMD ##############################################
 # read in SIMD data that gets used for the Demographics dashboard
 # This may not always be in the same folder. You might have to look in PSD extracts as well.
@@ -258,6 +211,7 @@ Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
 
 g_indicator_quart <- ggplot(Outpatients_tidy_q, aes(x = financial_year_q, y = numerator, fill = age_groups, text = paste('Indicator: ', indicator,
                                                                                                                          '<br>Age Group: ', age_groups,
+                                                                                                                         '<br>Financial Year: ', fin_year_cd,
                                                                                                                          '<br>Financial Quarter: ', financial_quarter,
                                                                                                                          '<br>Numerator: ', numerator))) +
   geom_bar(stat = "identity", position = "dodge") +
@@ -281,39 +235,39 @@ plotly_q_indicator <- ggplotly(g_indicator_quart, tooltip = "text")
 
 
 # Trauma age groups -------------------------------------------------------
-
-Outpatients_total_age <- Outpatients_tidy_indicator %>%
-  filter(AgeGroups != "All Ages") |>
-  filter(Indicator == "Trauma") |>
-  filter(financial_year_q %in% c("2021/22 - Q2",
-                                 "2022/23 - Q2",
-                                 "2023/24 - Q2")) |>
-  group_by(financial_year_q, fin_year_cd, FinancialQuarter, AgeGroups) %>%
-  summarise(Numerator = n()) %>%  ungroup() %>%
-  clean_names() |>
-  mutate(average_all = mean(numerator))
-
-
-g_monthly <- ggplot(Outpatients_total_age, aes(x = financial_year_q, y = numerator, fill = age_groups,
-                                               text = paste('Age Groups: ', age_groups,
-                                                            '<br>Financial Year: ', fin_year_cd,
-                                                            '<br>Financial Quarter: ', financial_quarter,
-                                                            '<br>Numerator: ', numerator))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  # paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
-  paletteer::scale_fill_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
-  labs(x = "Date",
-       y = "Appointments",
-       fill = "Age Group") +
-  # facet_wrap(~financial_quarter_name) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-    panel.grid.major.x = element_blank(),
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10),
-    panel.spacing = unit(2, "lines"))
-
-plotly_trauma_age_q2 <- ggplotly(g_monthly, tooltip = "text")
+#
+# Outpatients_total_age <- Outpatients_tidy_indicator %>%
+#   filter(AgeGroups != "All Ages") |>
+#   filter(Indicator == "Trauma") |>
+#   filter(financial_year_q %in% c("2021/22 - Q2",
+#                                  "2022/23 - Q2",
+#                                  "2023/24 - Q2")) |>
+#   group_by(financial_year_q, fin_year_cd, FinancialQuarter, AgeGroups) %>%
+#   summarise(Numerator = n()) %>%  ungroup() %>%
+#   clean_names() |>
+#   mutate(average_all = mean(numerator))
+#
+#
+# g_monthly <- ggplot(Outpatients_total_age, aes(x = financial_year_q, y = numerator, fill = age_groups,
+#                                                text = paste('Age Groups: ', age_groups,
+#                                                             '<br>Financial Year: ', fin_year_cd,
+#                                                             '<br>Financial Quarter: ', financial_quarter,
+#                                                             '<br>Numerator: ', numerator))) +
+#   geom_bar(stat = "identity", position = "dodge") +
+#   # paletteer::scale_fill_paletteer_d("Redmonder::qMSOGn", direction = -1) +
+#   paletteer::scale_fill_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
+#   labs(x = "Date",
+#        y = "Appointments",
+#        fill = "Age Group") +
+#   # facet_wrap(~financial_quarter_name) +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+#     panel.grid.major.x = element_blank(),
+#     legend.text = element_text(size = 10),
+#     legend.title = element_text(size = 10),
+#     panel.spacing = unit(2, "lines"))
+#
+# plotly_trauma_age_q2 <- ggplotly(g_monthly, tooltip = "text")
 
 
 # Practice ----------------------------------------------------------------
@@ -321,8 +275,10 @@ plotly_trauma_age_q2 <- ggplotly(g_monthly, tooltip = "text")
 Outpatients_total_practice <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator == "Trauma") |>
-  group_by(financial_year_q, fin_year_cd, FinancialQuarter, Practice_title, AgeGroups) |>
-  summarise(Numerator = n()) %>%  ungroup() %>%
+  group_by(financial_year_q, fin_year_cd, FinancialQuarter, Practice_title, AgeGroups) %>%
+  # group_by(financial_year_q, fin_year_cd, FinancialQuarter, Practice_title, AgeGroups) |>
+  summarise(Numerator = n()) %>%
+  ungroup() %>%
   clean_names() |>
   group_by(practice_title, age_groups) |>
   mutate(average = mean(numerator),
@@ -333,6 +289,7 @@ Outpatients_total_practice <- Outpatients_tidy_indicator %>%
 
 g_q_prac <- ggplot(Outpatients_total_practice, aes(x = financial_year_q, y = numerator, fill = age_groups,
                                                    text = paste('Practice: ', practice_title,
+                                                                '<br>Age Group: ', age_groups,
                                                                 '<br>Financial Year: ', fin_year_cd,
                                                                 '<br>Financial Quarter: ', financial_quarter,
                                                                 '<br>Numerator: ', numerator))) +
