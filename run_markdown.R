@@ -1,4 +1,6 @@
 
+rm(list = ls())
+gc()
 
 # Previous Financial Year
 ONE_START <- "'31 March 2021'"
@@ -17,10 +19,10 @@ FinancialQ <- "2"
 
 source("lookups.R")
 source("extract_v2.R")
-source("wrangling_v2.R")
+source("wrangling_v3.R")
 
 #monthly run
-rmarkdown::render("gp_outpatient_markdown.Rmd",
+rmarkdown::render("gp_outpatient_markdown_v2.Rmd",
                   output_file = glue("//conf/LIST_analytics/Borders/Ad-Hocs/2024-06 Outpatients/output/Borders West Cluster Analysis {Sys.Date()}.html")
 )
 
