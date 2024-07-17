@@ -206,6 +206,10 @@ Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
   group_by(age_groups) |>
   mutate(average = mean(numerator),
          age_total = sum(numerator)) |>
+  ungroup() |>
+  group_by(age_groups, indicator) |>
+  mutate(average_indicator = mean(numerator),
+         age_total_indicator = sum(numerator)) |>
   ungroup()
 
 

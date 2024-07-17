@@ -1,0 +1,80 @@
+---
+title: "Border West GP Outpatient Referral Appointments"
+author: "LIST Contacts: Bradley Roy & Andrew Massie"
+date: "Date Extracted: 17th July 2024"
+output: html_document
+---
+
+<p style="font-family: times, serif; font-size:25pt; color:red">
+    Management Information
+</p>
+
+## Background
+
+The GP Cluster Profiles are sent to Cluster Quality Leads on a quarterly basis. In the quarter 2 2023 cluster report for <B>Borders West</B> there was a large increase in the number of GP outpatient referral appointments for Trauma. From quarter 2 2022 to quarter 2023, there was an increase of <B>+95.4%</B> (+158.9% for those aged 65 and over). This is a notably larger change compared to the "All Specialties" category which showed a decrease of <B>-7.2%</B> (-7.3% for those aged 65 and over). It was agreed that the increase in Trauma referrals warranted further consideration. 
+
+This reports outlines GP Outpatient referral appointments for Borders West practices over the period <B>1st March 2021 to 31st December 2023</B>. These statistics are derived from data collected on new outpatient appointments at hospital outpatient departments in  
+Scotland (SMR00).  
+
+
+## Outpatient Analysis
+
+### 1. Borders West: Quarterly GP Outpatient Referral Appointments (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT") by Age Group, Quarter 1 2021/22 to Quarter 3 2023/24 
+```{r, echo=FALSE}
+plotly_q_agegroup
+```
+
+Figure 1 shows the pattern of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
+
+For those aged under 65, there is an increase in the number of appointments from quarter 1 2021/22 to quarter 4 201/22, reaching a peak of 254 appointments in 2021/22 Q3. There is an overall decline in appointments from quarter 4 to quarter 3 2023/24. For those aged 65 and over, the number of quarterly appointments fluctuates over the period and does not show a consistent or predictable pattern. 
+
+For the majority of quarters shown in figure 1, more appointments are attributed to the under 65 age group (on average: 187 appointments per quarter) than the 65 and over age group (on average: 117 appointments per quarter). Across the period measured there were an average of 152 appointments per quarter. 
+
+### 2. Borders West: Quarterly GP Outpatient Referral Appointments by Speciality and Age Group (Specialties include "Dermatology", "General Surgery", "Trauma", "ENT"), Quarter 1 2021/22 to Quarter 3 2023/24 
+```{r, echo=FALSE}
+plotly_q_indicator
+```
+
+Figure 2 shows the number of quarterly GP outpatient referral appointments (for the specialties Dermatology, General Surgery, Trauma, ENT) by age group, from March 1st 2021 to December 31st 2023. 
+
+Over the period measured in figure 2, General Surgery referrals account for the majority of appointments (1,132, 33.9% of appointments included in figure 1), followed by Dermatology (902, 27.0% of appointments included in figure 1), Trauma (689, 20.6% of appointments included in figure 1), and ENT (621, 18.6% of appointments included in figure 1). 
+
+For each indicator shown in figure 2, the total number of appointments across the period measured is higher in the under 65 age group than the 65 and over age group.
+
+For the under 65 age group, General Surgery shows a pronounced increase in the number of appointments for quarter 2 and 3 of 2021/22, reaching a peak of 125 appointments in quarter 3 of 2021/22. 
+
+
+### 3. Borders West: Quarterly Rate per 100,000 Population of GP Trauma Outpatient Referral Appointments by GP Practice and Age Group, Quarter 1 2021/22 to Quarter 3 2023/24 
+```{r, echo=FALSE}
+plotly_q_practice
+```
+
+Figure 3 shows the quarterly rate per 100,000 population of GP outpatient referral appointments (for the specialty Trauma) by GP Practice from March 1st 2021 to December 31st 2023. 
+
+All of the practices shown in figure 3 have a variable and unpredictable quarterly rate across the period measured for both the 65 and over and under 65 age groups. The average quarterly rate for each practice shown in figure 3 is higher for the 65 and over age group than the under 65 age group across the period measured. 
+
+The Tweed and West Linton show a decrease in rate for the under 65 age group during quarter 2 of 2022/23, followed by a quarterly increase in rate up to quarter 3 of 2023/24. The quarter 2 2022/23 decrease in the under 65 age group rate is not present in The Neidpath and St. Ronan's, which maintain a more consistent quarterly pattern across the period measured. 
+
+For the 65 and over age group, the highest quarterly rate for three practices occurred in quarter 4 of 2021/22 (St. Ronan's, The Neidpath, and The Tweed). West Linton recorded its second highest quarterly rate over the period measured in the 65 and over age group during the same quarter (quarter 4 of 2021/22). This is followed by the lowest (or equal to the lowest) quarterly rate in the 65 and over age group for three practices in quarter 2 of 2022/23 (West Linton, St. Ronan's, and The Neidpath). The Tweed recorded its second lowest quarterly rate over the period measured in the 65 and over age group during the same quarter (quarter 2 of 2022/23).
+
+
+### 4. Borders West: Quarterly GP Trauma Outpatient Referral Appointments by Hospital, Quarter 1 2021/22 to Quarter 3 2023/24 
+```{r, echo=FALSE}
+plotly_q_hospital
+```
+
+Figure 4 shows the number of quarterly GP outpatient referral appointments (for the specialty Trauma) by treatment location (i.e hospital), from March 1st 2022 to December 31st 2023. The "Other" category includes all locations other than Borders General Hospital for which outpatient referral appointments occurred over this period measured, they have been aggregated into the "Other" group for clarity. The number of appointments per quarter fluctuates over the period and does not show a consistent or predictable pattern. 
+
+Borders General Hospital accounts for the majority of appointments across all quarters in the period, 643 appointments (92.9% of appointments). "Other" locations account for 46 appointments over the period, an average of 4 appointments per quarter. 
+
+Notably, there appears to be a steady decline in the number of "Other" category appointments from quarter 1 of 2021/22 to quarter 3 of 2023/24. In the most recent financial year (2023/24), there has been only one appointment to a treatment location within the "Other" category. 
+
+
+
+
+
+
+
+
+
+

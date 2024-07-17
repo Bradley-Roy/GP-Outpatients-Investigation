@@ -170,6 +170,36 @@ plotly_q_agegroup <- ggplotly(g_q_agegroups, tooltip = "text")
 
 
 # Quarterly Indicator - line -----------------------------------------------------------------
+average_q_total_avg <- Outpatients_tidy_indicator |>
+  filter(AgeGroups == "All Ages") |>
+  filter(Indicator == "Trauma") |>
+  group_by(financial_year_q, fin_year_cd, FinancialQuarter, Indicator, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  clean_names() |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator),
+         age_total = sum(numerator)) |>
+  ungroup() |>
+  mutate(total = sum(numerator))
+
+
+Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
+  filter(Indicator != "All Specialities") |>
+  filter(AgeGroups != "All Ages") |>
+  mutate(fin_year_cd = extract_fin_year(ClinicDate)) |>
+  group_by(financial_year_q, fin_year_cd, FinancialQuarter, Indicator, AgeGroups) %>%
+  summarise(Numerator = n()) %>%  ungroup() %>%
+  # mutate(financial_year_q = paste0(fin_year_cd, " - ", FinancialQuarter)) |>
+  clean_names()|>
+  mutate(average_all = mean(numerator)) |>
+  group_by(age_groups) |>
+  mutate(average = mean(numerator),
+         age_total = sum(numerator)) |>
+  ungroup() |>
+  group_by(age_groups, indicator) |>
+  mutate(average_indicator = mean(numerator),
+         age_total_indicator = sum(numerator)) |>
+  ungroup()
 
 Outpatients_line_q <- Outpatients_tidy_q |>
   mutate(age_groups = recode(age_groups, "65+" = "65 and over"))
@@ -182,7 +212,8 @@ g_indicator_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = nu
   geom_line(aes(group = indicator), size = 0.9) +
   geom_point(aes(group = indicator)) +
   paletteer::scale_colour_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
-  facet_wrap(~age_groups) +
+  # facet_wrap(~age_groups) +
+  facet_wrap(~factor(age_groups, c("Under 65", "65 and over"))) +
   scale_y_continuous(expand = c(0,0), limits = c(0,130), breaks = breaks_width(20)) +
   labs(x = "Date",
        y = "Appointments",
@@ -200,20 +231,39 @@ plotly_q_indicator <- ggplotly(g_indicator_quart, tooltip = "text") |>
 
 # Quarterly Practice - line -----------------------------------------------------------------
 
+Outpatients_total_practice <- Outpatients_tidy_indicator %>%
+  filter(AgeGroups != "All Ages") |>
+  filter(Indicator == "Trauma") |>
+  group_by(financial_year_q, fin_year_cd, FinancialQuarter, Practice_title, AgeGroups, population) %>%
+  # group_by(financial_year_q, fin_year_cd, FinancialQuarter, Practice_title, AgeGroups) |>
+  summarise(Numerator = n()) %>%
+  ungroup() %>%
+  clean_names() |>
+  group_by(practice_title, age_groups) |>
+  mutate(average = mean(numerator),
+         age_total = sum(numerator)) |>
+  ungroup() |>
+  mutate(rate = round_half_up(((numerator / population)*100000)), 2) |>
+  group_by(practice_title, age_groups) |>
+  mutate(average_rate = mean(rate),
+         age_total_rate = sum(rate)) |>
+  ungroup()
+
 Outpatients_line_q <- Outpatients_total_practice |>
   mutate(age_groups = recode(age_groups, "65+" = "65 and over"),
          practice_title = str_remove(practice_title, " PRACTICE"))
 
-g_practice_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = numerator, colour = practice_title, text = paste('Indicator: ', practice_title,
+g_practice_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = rate, colour = practice_title, text = paste('Indicator: ', practice_title,
                                                                                                                               '<br>Age Group: ', age_groups,
                                                                                                                               '<br>Financial Year: ', fin_year_cd,
                                                                                                                               '<br>Financial Quarter: ', financial_quarter,
-                                                                                                                              '<br>Numerator: ', numerator))) +
+                                                                                                                              '<br>Rate per 100,000 population: ', comma(rate)))) +
   geom_line(aes(group = practice_title), size = 0.9) +
   geom_point(aes(group = practice_title)) +
   paletteer::scale_colour_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
-  facet_wrap(~age_groups) +
-  scale_y_continuous(expand = c(0,0), limits = c(0,31), breaks = breaks_width(5)) +
+  facet_wrap(~factor(age_groups, c("Under 65", "65 and over"))) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1800), breaks = breaks_width(500),
+                     label = comma) +
   labs(x = "Date",
        y = "Appointments (Rate per 100,000 population)",
        colour = "Practice") +
@@ -226,7 +276,7 @@ g_practice_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = num
         legend.position = "bottom")
 
 plotly_q_practice <- ggplotly(g_practice_quart, tooltip = "text") |>
-  layout(legend = list(orientation = "h", y =-0.3))
+  layout(legend = list(orientation = "h", y =-0.3, x = -0.1))
 
 
 # Hospital Quarterly ----------------------------------------------------------------

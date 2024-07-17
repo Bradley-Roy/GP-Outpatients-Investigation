@@ -19,10 +19,10 @@ FinancialQ <- "2"
 
 source("lookups.R")
 source("extract_v2.R")
-source("wrangling_v3.R")
+source("wrangling_v4.R")
 
 #monthly run
-rmarkdown::render("gp_outpatient_markdown_v2.Rmd",
+rmarkdown::render("gp_outpatient_markdown_v3.Rmd",
                   output_file = glue("//conf/LIST_analytics/Borders/Ad-Hocs/2024-06 Outpatients/output/Borders West Cluster Analysis {Sys.Date()}.html")
 )
 
