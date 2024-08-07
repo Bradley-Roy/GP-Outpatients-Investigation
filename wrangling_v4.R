@@ -13,36 +13,33 @@
 
 ############################################## Open Data - Demographics ##############################################
 
+
+Jul2018 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/0a306292-cf96-4d89-96b8-33804174db3c/download/20180701-practice-list-size.csv"
+Jul2019 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/538d2526-1fc9-431a-9efc-fb1008e76442/download/20190701_practice_list_size.csv"
+Jul2020 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/2167f804-5d7d-49ac-8724-24ada0fbafe8/download/practice_listsizes_jul2020-open-data.csv"
 Jul2021 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/0779e100-1aaf-4e43-8536-57c8b99ca710/download/practice_listsizes_jul2021-open-data.csv"
 Jul2022 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/64918d4f-f1d9-4e99-8e9f-130ddc890748/download/practice_listsizes_jul2022-open-data.csv"
 Jul2023 <- "https://www.opendata.nhs.scot/dataset/e3300e98-cdd2-4f4e-a24e-06ee14fcc66c/resource/d7f423dd-9611-4ae9-a9c8-4dcc532ece22/download/practice_listsizes_jul2023-open-data.csv"
 
-# read link into R as csv
-ListYear21 <-  read_csv(Jul2021)
-ListYear21_pivot <- ListYear21 |>
-  clean_names() |>
-  mutate(`Under 65` = ages0to4 + ages5to14 + ages15to24 + ages25to44 + ages45to64,
-         `65+` = ages65to74 + ages75to84 + ages85plus) |>
-  filter(sex == "All" &
-           practice_code %in% practice_list)
+list_size_cleanup <- function(dataframe_input) {
+  dataframe_output <-  read_csv(dataframe_input)
+  dataframe_output_pivot <- dataframe_output |>
+    clean_names() |>
+    mutate(`Under 65` = ages0to4 + ages5to14 + ages15to24 + ages25to44 + ages45to64,
+           `65+` = ages65to74 + ages75to84 + ages85plus) |>
+    filter(sex == "All" &
+             practice_code %in% practice_list)
+  dataframe_output_pivot
+}
 
-ListYear22 <-  read_csv(Jul2022) # read link into R as csv
-ListYear22_pivot <- ListYear22 |>
-  clean_names() |>
-  mutate(`Under 65` = ages0to4 + ages5to14 + ages15to24 + ages25to44 + ages45to64,
-         `65+` = ages65to74 + ages75to84 + ages85plus) |>
-  filter(sex == "All" &
-           practice_code %in% practice_list)
+ListYear18_pivot <- list_size_cleanup(Jul2018)
+ListYear19_pivot <- list_size_cleanup(Jul2019)
+ListYear20_pivot <- list_size_cleanup(Jul2020)
+ListYear21_pivot <- list_size_cleanup(Jul2021)
+ListYear22_pivot <- list_size_cleanup(Jul2022)
+ListYear23_pivot <- list_size_cleanup(Jul2023)
 
-ListYear23 <-  read_csv(Jul2023)
-ListYear23_pivot <- ListYear23 |>
-  clean_names() |>
-  mutate(`Under 65` = ages0to4 + ages5to14 + ages15to24 + ages25to44 + ages45to64,
-         `65+` = ages65to74 + ages75to84 + ages85plus) |>
-  filter(sex == "All" &
-           practice_code %in% practice_list)
-
-ListYear_all_pivot <- bind_rows(ListYear21_pivot, ListYear22_pivot, ListYear23_pivot) |>
+ListYear_all_pivot <- bind_rows(ListYear18_pivot, ListYear19_pivot, ListYear20_pivot, ListYear21_pivot, ListYear22_pivot, ListYear23_pivot) |>
   select(date, practice_code, all_ages, `Under 65`, `65+`) |>
   mutate(practice_code = as.character(practice_code)) |>
   pivot_longer(cols = c(`Under 65`, `65+`), values_to = "population") |>
@@ -84,8 +81,9 @@ Outpatients_tidy <- Outpatients_raw %>%
   # mutate(FinancialYear_q = paste0(FinancialYear, " - ", FinancialQuarter)) |>
   mutate(fin_year_cd = extract_fin_year(ClinicDate)) |>
   mutate(financial_year_q = paste0(fin_year_cd, " - Q", FinancialQuarter)) |>
-  filter(ClinicDate >= "2021-04-01")
+  filter(ClinicDate >= "2018-04-01")
 
+rm(Outpatients_raw)
 
 # Create aggregate data for All Ages
 OutpatientsAllAges <- Outpatients_tidy %>%
@@ -115,17 +113,25 @@ Outpatients_tidy_indicator <- Outpatients_tidy %>% # join selected specialties
 Outpatients_tidy_indicator_totals <- Outpatients_tidy_indicator |>
   filter(AgeGroups != "All Ages") |>
   filter(Indicator != "All Specialities") |>
+  group_by(Indicator) |>
+  summarise(numerator = n()) |>
+  ungroup() |>
+  mutate(total = sum(numerator),
+         average = percent(numerator / total))
+
+Outpatients_tidy_indicator_totals_q <- Outpatients_tidy_indicator |>
+  filter(AgeGroups != "All Ages") |>
+  filter(Indicator != "All Specialities") |>
   group_by(Indicator, financial_year_q) |>
   summarise(numerator = n()) |>
   ungroup() |>
   mutate(total = sum(numerator),
          average = percent(numerator / total))
 
-
-Outpatients_tidy_indicator_totals <- Outpatients_tidy_indicator |>
+Outpatients_tidy_indicator_totals_age <- Outpatients_tidy_indicator |>
   filter(AgeGroups != "All Ages") |>
   filter(Indicator != "All Specialities") |>
-  group_by(Indicator) |>
+  group_by(Indicator, AgeGroups) |>
   summarise(numerator = n()) |>
   ungroup() |>
   mutate(total = sum(numerator),
@@ -137,13 +143,18 @@ Outpatients_tidy_agegroup <- Outpatients_tidy_indicator %>%
   filter(AgeGroups != "All Ages") |>
   filter(Indicator != "All Specialities") |>
   group_by(financial_year_q, fin_year_cd, FinancialQuarter, AgeGroups) %>%
-  summarise(Numerator = n()) %>%
+  summarise(Numerator = n(),
+            average_all = mean(Numerator)) %>%
   ungroup() %>%
   clean_names() |>
   group_by(age_groups) |>
   mutate(average = mean(numerator)) |>
   ungroup() |>
-  mutate(average_all = mean(numerator))
+  mutate(average_all = mean(numerator)) |>
+  group_by(financial_year_q) |>
+  mutate(quarterly_total = sum(numerator)) |>
+  ungroup() |>
+  mutate(quart_average_all = mean(quarterly_total))
 
 
 g_q_agegroups <- ggplot(Outpatients_tidy_agegroup, aes(x = financial_year_q, y = numerator, fill = age_groups,
@@ -165,8 +176,7 @@ g_q_agegroups <- ggplot(Outpatients_tidy_agegroup, aes(x = financial_year_q, y =
         legend.text = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-plotly_q_agegroup <- ggplotly(g_q_agegroups, tooltip = "text")
-
+plotly_q_agegroup <- ggplotly(g_q_agegroups, tooltip = "text", width = plotly_width, height = plotly_height)
 
 
 # Quarterly Indicator - line -----------------------------------------------------------------
@@ -180,7 +190,8 @@ average_q_total_avg <- Outpatients_tidy_indicator |>
   mutate(average = mean(numerator),
          age_total = sum(numerator)) |>
   ungroup() |>
-  mutate(total = sum(numerator))
+  mutate(total = sum(numerator)) |>
+  group_by(indicator)
 
 
 Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
@@ -199,6 +210,9 @@ Outpatients_tidy_q<- Outpatients_tidy_indicator %>%
   group_by(age_groups, indicator) |>
   mutate(average_indicator = mean(numerator),
          age_total_indicator = sum(numerator)) |>
+  ungroup()|>
+  group_by(indicator) |>
+  mutate(average_indicator_allage = mean(numerator)) |>
   ungroup()
 
 Outpatients_line_q <- Outpatients_tidy_q |>
@@ -214,10 +228,10 @@ g_indicator_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = nu
   paletteer::scale_colour_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
   # facet_wrap(~age_groups) +
   facet_wrap(~factor(age_groups, c("Under 65", "65 and over"))) +
-  scale_y_continuous(expand = c(0,0), limits = c(0,130), breaks = breaks_width(20)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,160), breaks = breaks_width(20)) +
   labs(x = "Date",
        y = "Appointments",
-       colour = "Indicator") +
+       colour = "Specialty") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.grid.major.x = element_blank(),
@@ -225,8 +239,8 @@ g_indicator_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = nu
         legend.title = element_text(size = 10),
         panel.spacing = unit(2, "lines"))
 
-plotly_q_indicator <- ggplotly(g_indicator_quart, tooltip = "text") |>
-  layout(legend = list(orientation = "h", y =-0.3, x=0.1))
+plotly_q_indicator <- ggplotly(g_indicator_quart, tooltip = "text", width = plotly_width, height = plotly_height) |>
+  layout(legend = list(orientation = "h", y =-0.3, x=0.2))
 
 
 # Quarterly Practice - line -----------------------------------------------------------------
@@ -243,9 +257,9 @@ Outpatients_total_practice <- Outpatients_tidy_indicator %>%
   mutate(average = mean(numerator),
          age_total = sum(numerator)) |>
   ungroup() |>
-  mutate(rate = round_half_up(((numerator / population)*100000)), 2) |>
+  mutate(rate = round_half_up(((numerator / population)*1000), 1)) |>
   group_by(practice_title, age_groups) |>
-  mutate(average_rate = mean(rate),
+  mutate(average_rate = round_half_up(mean(rate), 1),
          age_total_rate = sum(rate)) |>
   ungroup()
 
@@ -257,15 +271,15 @@ g_practice_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = rat
                                                                                                                               '<br>Age Group: ', age_groups,
                                                                                                                               '<br>Financial Year: ', fin_year_cd,
                                                                                                                               '<br>Financial Quarter: ', financial_quarter,
-                                                                                                                              '<br>Rate per 100,000 population: ', comma(rate)))) +
+                                                                                                                              '<br>Rate per 1,000 population: ', rate))) +
   geom_line(aes(group = practice_title), size = 0.9) +
   geom_point(aes(group = practice_title)) +
   paletteer::scale_colour_paletteer_d("LaCroixColoR::Pamplemousse", direction = -1) +
   facet_wrap(~factor(age_groups, c("Under 65", "65 and over"))) +
-  scale_y_continuous(expand = c(0,0), limits = c(0,1800), breaks = breaks_width(500),
+  scale_y_continuous(expand = c(0,0), limits = c(0,18), breaks = breaks_width(5),
                      label = comma) +
   labs(x = "Date",
-       y = "Appointments (Rate per 100,000 population)",
+       y = "Appointments (Rate per 1,000 population)",
        colour = "Practice") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -275,8 +289,8 @@ g_practice_quart <- ggplot(Outpatients_line_q, aes(x = financial_year_q, y = rat
         panel.spacing = unit(2, "lines"),
         legend.position = "bottom")
 
-plotly_q_practice <- ggplotly(g_practice_quart, tooltip = "text") |>
-  layout(legend = list(orientation = "h", y =-0.3, x = -0.1))
+plotly_q_practice <- ggplotly(g_practice_quart, tooltip = "text", width = plotly_width, height = plotly_height) |>
+  layout(legend = list(orientation = "h", y =-0.3, x = 0.15))
 
 
 # Hospital Quarterly ----------------------------------------------------------------
@@ -292,8 +306,10 @@ Outpatients_tidy_hospital <- Outpatients_tidy_indicator %>%
   mutate(hospital_name = replace_na(hospital_name, "Unknown")) |>
   group_by(hospital_name) |>
   mutate(average = mean(numerator),
-         age_total = sum(numerator)) |>
-  ungroup()
+         total_hosp = sum(numerator)) |>
+  ungroup() |>
+  mutate(total_all = sum(numerator),
+         pcent = percent(total_hosp / total_all))
 
 
 g_q_hospital <- ggplot(Outpatients_tidy_hospital, aes(x = financial_year_q, y = numerator, fill = hospital_name, text = paste('Hospital: ', hospital_name,
@@ -311,6 +327,6 @@ g_q_hospital <- ggplot(Outpatients_tidy_hospital, aes(x = financial_year_q, y = 
         legend.text = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-plotly_q_hospital <- ggplotly(g_q_hospital, tooltip = "text")
+plotly_q_hospital <- ggplotly(g_q_hospital, tooltip = "text", width = plotly_width, height = plotly_height)
 
 

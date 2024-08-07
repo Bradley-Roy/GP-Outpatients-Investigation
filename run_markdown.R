@@ -3,18 +3,21 @@ rm(list = ls())
 gc()
 
 # Previous Financial Year
-ONE_START <- "'31 March 2021'"
+ONE_START <- "'31 March 2019'"
 ONE_END <- "'31 December 2023'"
 
 #Set specific financial years of interest (eg for 2018/19 - "2018")
 FinancialYear1 <- "2022"
 FinancialYear2 <- "2023"
 # FinancialQ <- "3"
-FinancialQ <- "2"
+# FinancialQ <- "2"
 
 Year1 <-"2022"
 Year2 <-"2023"
 FinancialQ <- "2"
+
+plotly_width <- 900
+plotly_height <- 600
 
 
 source("lookups.R")
