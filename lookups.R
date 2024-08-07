@@ -25,7 +25,7 @@ library("haven") # read spss files
 library("openxlsx") # read excel workbooks
 library("readxl")
 
-
+title_date <- format.Date(ymd(Sys.Date()), "%dth %B %Y")
 
 #File paths
 # setwd("/PHI_conf/PrimaryCare/PCI/Cluster Profiles")

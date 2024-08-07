@@ -19,8 +19,8 @@ channel <- suppressWarnings(dbConnect(odbc(),  dsn = "SMRA",
 # This will show you which data you have access to through RStudio Server. You need GRO_Deaths, SMR00, SMR01
 odbcListObjects(channel, schema="ANALYSIS")
 
-# This will show you all the variables in the dataset. You can use these to help build your querey.
-odbcPreviewObject(channel, table="ANALYSIS.SMR00_PI", rowLimit=0)
+# This will show you all the variables in the dataset. You can use these to help build your query.
+names_sql <- odbcPreviewObject(channel, table="ANALYSIS.SMR00_PI", rowLimit=0)
 
 
 ############################################## Outpatients ##############################################
@@ -35,7 +35,14 @@ Outpatients_raw <- as_tibble(dbGetQuery(channel,
                                                          "WHERE (((CLINIC_DATE between ",ONE_START, " AND ", ONE_END, "))", # between these dates
                                                          # "OR (CLINIC_DATE between ", TWO_START, " AND ",TWO_END, "))", # and between these dates
                                                          "AND ((REFERRAL_TYPE=1) OR (REFERRAL_TYPE=2))", # New outpatient appointments only
-                                                         "AND (REFERRAL_SOURCE= '1'))"))) # GP referrals only
+                                                         "AND (REFERRAL_SOURCE= '1')", # GP referrals only
+                                                         "AND GP_PRACTICE_CODE IN (' 16121', ' 16160', ' 16174', ' 16211',
+                                                                                    '16121', '16160', '16174', '16211')", # Borders West Practices
+                                                         "AND (SPECIALTY LIKE '%A7%'
+                                                                OR SPECIALTY LIKE '%C1%'
+                                                                OR SPECIALTY LIKE '%C8%'
+                                                                OR SPECIALTY LIKE '%C5%'))"))) # specific specialties
+
 
 
 
@@ -65,6 +72,6 @@ Outpatients_raw <- Outpatients_raw %>%
 # clear up space.
 #rm(list = ls())
 
-rm("Deaths_raw", "channel")
+rm("channel")
 gc()
 
